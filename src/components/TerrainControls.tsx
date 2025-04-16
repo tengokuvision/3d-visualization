@@ -9,6 +9,8 @@ interface TerrainControlsProps {
   onColorChange: (color: string) => void
   scale: number
   onScaleChange: (scale: number) => void
+  autoRotate?: boolean
+  onAutoRotateToggle?: (enabled: boolean) => void
 }
 
 const TerrainControls = ({
@@ -18,17 +20,30 @@ const TerrainControls = ({
   onColorChange,
   scale,
   onScaleChange,
+  autoRotate = true,
+  onAutoRotateToggle,
 }: TerrainControlsProps) => {
-  const handleWireframeToggle = () => {
-    onWireframeToggle(!wireframe)
+  const handleWireframeToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Wireframe toggle clicked, new value:", e.target.checked)
+    onWireframeToggle(e.target.checked)
   }
 
   const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log("Color changed to:", e.target.value)
     onColorChange(e.target.value)
   }
 
   const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onScaleChange(Number.parseFloat(e.target.value))
+    const newScale = Number.parseFloat(e.target.value)
+    console.log("Scale changed to:", newScale)
+    onScaleChange(newScale)
+  }
+
+  const handleAutoRotateToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onAutoRotateToggle) {
+      console.log("Auto-rotate toggle clicked, new value:", e.target.checked)
+      onAutoRotateToggle(e.target.checked)
+    }
   }
 
   // Add a reset view button
@@ -43,6 +58,13 @@ const TerrainControls = ({
         <label>
           <input type="checkbox" checked={wireframe} onChange={handleWireframeToggle} />
           Wireframe (or press 'w')
+        </label>
+      </div>
+
+      <div className="control-group">
+        <label>
+          <input type="checkbox" checked={autoRotate} onChange={handleAutoRotateToggle} />
+          Auto-rotate
         </label>
       </div>
 
