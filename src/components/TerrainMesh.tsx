@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useMemo } from "react"
+import { useRef, useMemo, useEffect } from "react"
 import type * as THREE from "three"
-import { BufferGeometry, BufferAttribute, MeshStandardMaterial } from "three"
-import { useFrame } from "@react-three/fiber"
+import { BufferGeometry, BufferAttribute, MeshStandardMaterial, Box3, Vector3 } from "three"
+import { useFrame, useThree } from "@react-three/fiber"
 
 interface TerrainMeshProps {
   vertices: number[]
@@ -15,14 +15,21 @@ interface TerrainMeshProps {
 
 const TerrainMesh = ({ vertices, indices, wireframe, color, scale }: TerrainMeshProps) => {
   const meshRef = useRef<THREE.Mesh>(null)
+  const { scene } = useThree()
 
   const geometry = useMemo(() => {
     const geometry = new BufferGeometry()
+
     const positions = new Float32Array(vertices)
+
     geometry.setAttribute("position", new BufferAttribute(positions, 3))
+
     geometry.setIndex(indices)
+
     geometry.computeVertexNormals()
+
     geometry.center()
+
     return geometry
   }, [vertices, indices])
 
@@ -36,6 +43,23 @@ const TerrainMesh = ({ vertices, indices, wireframe, color, scale }: TerrainMesh
     })
   }, [color, wireframe])
 
+  // Log terrain information for debugging
+  useEffect(() => {
+    if (meshRef.current) {
+      const box = new Box3().setFromObject(meshRef.current)
+      const size = new Vector3()
+      box.getSize(size)
+
+      console.log("Terrain size:", size)
+      console.log("Terrain position:", meshRef.current.position)
+      console.log("Terrain scale:", meshRef.current.scale)
+
+      // Force scene update
+      scene.updateMatrixWorld(true)
+    }
+  }, [scene, geometry, scale])
+
+  // Add subtle rotation animation
   useFrame(() => {
     if (meshRef.current) {
       meshRef.current.rotation.y += 0.001
@@ -50,6 +74,8 @@ const TerrainMesh = ({ vertices, indices, wireframe, color, scale }: TerrainMesh
       castShadow
       receiveShadow
       scale={[scale, scale, scale]}
+      position={[0, 0, 0]}
+      rotation={[0, 0, 0]}
     />
   )
 }

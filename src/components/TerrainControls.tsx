@@ -31,6 +31,12 @@ const TerrainControls = ({
     onScaleChange(Number.parseFloat(e.target.value))
   }
 
+  // Add a reset view button
+  const handleResetView = () => {
+    // This will reload the page, resetting the camera
+    window.location.reload()
+  }
+
   return (
     <div className="terrain-controls">
       <div className="control-group">
@@ -54,6 +60,12 @@ const TerrainControls = ({
       <div className="control-group">
         <label>Scale: {scale.toFixed(2)}</label>
         <input type="range" min="0.01" max="0.5" step="0.01" value={scale} onChange={handleScaleChange} />
+      </div>
+
+      <div className="control-group">
+        <button onClick={handleResetView} className="reset-button">
+          Reset View
+        </button>
       </div>
     </div>
   )

@@ -1,18 +1,32 @@
 "use client"
 
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
-import { Canvas } from "@react-three/fiber"
 import { Suspense, useEffect, useState } from "react"
-import "./App.css"
-import TerrainControls from "./components/TerrainControls"
+import { Canvas, useThree } from "@react-three/fiber"
+import { OrbitControls } from "@react-three/drei"
 import TerrainMesh from "./components/TerrainMesh"
+import TerrainControls from "./components/TerrainControls"
 import terrainData from "./data/terrain-data.json"
+import "./App.css"
+
+// Camera setup component to ensure terrain is visible
+function CameraSetup() {
+  const { camera } = useThree()
+
+  useEffect(() => {
+    // Position camera to clearly see the terrain
+    camera.position.set(0, 10, 30)
+    camera.lookAt(0, 0, 0)
+    camera.updateProjectionMatrix()
+  }, [camera])
+
+  return null
+}
 
 function App() {
   const [loading, setLoading] = useState(true)
   const [wireframe, setWireframe] = useState(false)
   const [color, setColor] = useState("#6b8e23")
-  const [scale, setScale] = useState(0.1)
+  const [scale, setScale] = useState(0.05) // Smaller initial scale to ensure visibility
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 500)
@@ -43,6 +57,7 @@ function App() {
         ) : (
           <div className="canvas-container">
             <Canvas shadows>
+              <CameraSetup />
               <color attach="background" args={["#f0f0f0"]} />
               <ambientLight intensity={0.5} />
               <directionalLight
@@ -53,6 +68,12 @@ function App() {
                 shadow-mapSize-height={2048}
               />
               <Suspense fallback={null}>
+                {/* Add axes helper to visualize orientation */}
+                <axesHelper args={[5]} />
+
+                {/* Add grid to help with orientation */}
+                <gridHelper args={[20, 20, "#888888", "#444444"]} />
+
                 <TerrainMesh
                   vertices={terrainData.vertices}
                   indices={terrainData.indices}
@@ -62,7 +83,6 @@ function App() {
                 />
               </Suspense>
               <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} minDistance={2} maxDistance={200} />
-              <PerspectiveCamera makeDefault position={[0, 10, 30]} fov={60} />
             </Canvas>
 
             <div className="controls-container">
